@@ -10,20 +10,22 @@ from documentcloud import DocumentCloud
 from tabulate import tabulate
 from twython import Twython
 
+dc = DocumentCloud(
+    os.environ['DOCUMENT_CLOUD_USERNAME'], os.environ['DOCUMENT_CLOUD_PW'])
 
-def scrape_exec_orders(quiet=True):
+tw = Twython(
+    os.environ['TWITTER_APP_KEY'],
+    os.environ['TWITTER_APP_SECRET'],
+    os.environ['TWITTER_OAUTH_TOKEN'],
+    os.environ['TWITTER_OAUTH_TOKEN_SECRET'])
+
+airtab = Airtable(os.environ['other_scrapers_db'],
+                  "exec orders", os.environ['AIRTABLE_API_KEY'])
+
+
+def scrape_exec_orders(data):
     """This function does blah blah."""
     t0 = time.time()
-    dc = DocumentCloud(
-        os.environ['DOCUMENT_CLOUD_USERNAME'], os.environ['DOCUMENT_CLOUD_PW'])
-    tw = Twython(
-        os.environ['TWITTER_APP_KEY'],
-        os.environ['TWITTER_APP_SECRET'],
-        os.environ['TWITTER_OAUTH_TOKEN'],
-        os.environ['TWITTER_OAUTH_TOKEN_SECRET'],
-    )
-    airtab = Airtable(os.environ['other_scrapers_db'],
-                      "exec orders", os.environ['AIRTABLE_API_KEY'])
     url = "https://www.sos.ms.gov/Education-Publications/Pages/Executive-Orders.aspx"
     muh_headers = {
         "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36"}
@@ -59,11 +61,8 @@ def scrape_exec_orders(quiet=True):
                     this_dict["dc_title"] = obj.title
                     this_dict["dc_access"] = obj.access
                     this_dict["dc_pages"] = obj.pages
-                    try:
-                        full_text = obj.full_text.decode("utf-8")
-                        this_dict["dc_full_text"] = os.linesep.join([s for s in full_text.splitlines() if s])
-                    except:
-                        pass
+                    full_text = obj.full_text.decode("utf-8")
+                    this_dict["dc_full_text"] = os.linesep.join([s for s in full_text.splitlines() if s])
                     airtab.insert(this_dict, typecast=True)
                     media_ids = []
                     image_list = obj.normal_image_url_list[:4]
@@ -79,14 +78,15 @@ def scrape_exec_orders(quiet=True):
                         f"{this_dict['order_url']}"
                     )
                     tw.update_status(status=status, media_ids=media_ids)
-    table = [['scraper', 'seconds', 'new', 'total']]
-    table.append(['sos scraper', round(time.time() - t0, 2), new_rows, total_rows])
-    if not quiet:
-        print(tabulate(table, headers="firstrow", tablefmt="fancy_grid"))
+    data['value2'] = f"scraper: SOS\nseconds: {round(time.time() - t0, 2)}\nnew: {new_rows}\ntotal rows: {total_rows}"
 
 
 def main():
-    scrape_exec_orders(quiet=False)
+    data = {'value1': 'sos_scraper.py'}
+    scrape_exec_orders(data)
+    data['value3'] = 'success'
+    ifttt_event_url = os.environ['IFTTT_WEBHOOKS_URL'].format('code_completed')
+    requests.post(ifttt_event_url, json=data)
 
 
 if __name__ == "__main__":

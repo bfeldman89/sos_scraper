@@ -7,11 +7,10 @@ import requests
 from airtable import Airtable
 from bs4 import BeautifulSoup
 from documentcloud import DocumentCloud
-from tabulate import tabulate
 from twython import Twython
 
-dc = DocumentCloud(
-    os.environ['DOCUMENT_CLOUD_USERNAME'], os.environ['DOCUMENT_CLOUD_PW'])
+dc = DocumentCloud(os.environ['DOCUMENT_CLOUD_USERNAME'],
+                   os.environ['DOCUMENT_CLOUD_PW'])
 
 tw = Twython(
     os.environ['TWITTER_APP_KEY'],
@@ -20,17 +19,20 @@ tw = Twython(
     os.environ['TWITTER_OAUTH_TOKEN_SECRET'])
 
 airtab = Airtable(os.environ['other_scrapers_db'],
-                  "exec orders", os.environ['AIRTABLE_API_KEY'])
+                  "exec orders",
+                  os.environ['AIRTABLE_API_KEY'])
+
+muh_headers = {
+    "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36"}
+url = "https://www.sos.ms.gov/Education-Publications/Pages/Executive-Orders.aspx"
 
 
 def scrape_exec_orders(data):
     """This function does blah blah."""
     t0 = time.time()
-    url = "https://www.sos.ms.gov/Education-Publications/Pages/Executive-Orders.aspx"
-    muh_headers = {
-        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36"}
     r = requests.get(url, headers=muh_headers)
-    soup = BeautifulSoup(r.text, "html.parser").find('table', class_='table-striped')
+    soup = BeautifulSoup(r.text, "html.parser").find(
+        'table', class_='table-striped')
     rows = soup.find_all("tr")
     new_rows, total_rows = 0, 0
     for row in rows:
@@ -62,7 +64,8 @@ def scrape_exec_orders(data):
                     this_dict["dc_access"] = obj.access
                     this_dict["dc_pages"] = obj.pages
                     full_text = obj.full_text.decode("utf-8")
-                    this_dict["dc_full_text"] = os.linesep.join([s for s in full_text.splitlines() if s])
+                    this_dict["dc_full_text"] = os.linesep.join(
+                        [s for s in full_text.splitlines() if s])
                     airtab.insert(this_dict, typecast=True)
                     media_ids = []
                     image_list = obj.normal_image_url_list[:4]

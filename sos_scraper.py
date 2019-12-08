@@ -22,7 +22,6 @@ airtab = Airtable(os.environ['other_scrapers_db'],
                   "exec orders",
                   os.environ['AIRTABLE_API_KEY'])
 
-
 muh_headers = {
     "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36"}
 
@@ -84,9 +83,9 @@ def scrape_exec_orders(ifttt_payload):
                     )
                     tweet = tw.update_status(
                         status=status, media_ids=media_ids)
-                    ifttt_payload['value3'] = f"https://twitter.com/i/web/status/{tweet['id']}"
-    ifttt_payload['value1'] = round(time.time() - t0, 2)
-    ifttt_payload['value2'] = new_rows
+                    ifttt_payload['Value3'] = f"https://twitter.com/i/web/status/{tweet['id']}"
+    ifttt_payload['Value1'] = round(time.time() - t0, 2)
+    ifttt_payload['Value2'] = new_rows
 
 
 def main():

@@ -21,8 +21,7 @@ tw = Twython(
 airtab = Airtable(os.environ['other_scrapers_db'],
                   "exec orders",
                   os.environ['AIRTABLE_API_KEY'])
-airtab_log = Airtable(os.environ['log_db'],
-                      'log', os.environ['AIRTABLE_API_KEY'])
+airtab_log = Airtable(os.environ['log_db'], 'log', os.environ['AIRTABLE_API_KEY'])
 
 muh_headers = {
     "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36"}
@@ -33,7 +32,7 @@ url = "https://www.sos.ms.gov/Education-Publications/Pages/Executive-Orders.aspx
 def wrap_it_up(function, t0, new, total):
     this_dict = {'module': 'sos_scraper.py'}
     this_dict['function'] = function
-    this_dict['duration'] = round((time.time() - t0) / 60, 2)
+    this_dict['duration'] = round(time.time() - t0, 2)
     this_dict['total'] = total
     this_dict['new'] = new
     airtab_log.insert(this_dict, typecast=True)

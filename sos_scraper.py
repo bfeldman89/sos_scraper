@@ -21,6 +21,8 @@ tw = Twython(
 airtab = Airtable(os.environ['other_scrapers_db'],
                   "exec orders",
                   os.environ['AIRTABLE_API_KEY'])
+airtab_log = Airtable(os.environ['log_db'],
+                      'log', os.environ['AIRTABLE_API_KEY'])
 
 muh_headers = {
     "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36"}
@@ -28,7 +30,16 @@ muh_headers = {
 url = "https://www.sos.ms.gov/Education-Publications/Pages/Executive-Orders.aspx"
 
 
-def scrape_exec_orders(ifttt_payload):
+def wrap_it_up(function, t0, new, total):
+    this_dict = {'module': 'sos_scraper.py'}
+    this_dict['function'] = function
+    this_dict['duration'] = round((time.time() - t0) / 60, 2)
+    this_dict['total'] = total
+    this_dict['new'] = new
+    airtab_log.insert(this_dict, typecast=True)
+
+
+def scrape_exec_orders():
     """This function does blah blah."""
     t0 = time.time()
     r = requests.get(url, headers=muh_headers)
@@ -81,18 +92,12 @@ def scrape_exec_orders(ifttt_payload):
                         f"On {this_dict['date_of_order']}, Gov. Bryant issued {this_dict['dc_title']}.\n"
                         f"{this_dict['order_url']}"
                     )
-                    tweet = tw.update_status(
-                        status=status, media_ids=media_ids)
-                    ifttt_payload['Value3'] = f"https://twitter.com/i/web/status/{tweet['id']}"
-    ifttt_payload['Value1'] = round(time.time() - t0, 2)
-    ifttt_payload['Value2'] = new_rows
+                    tw.update_status(status=status, media_ids=media_ids)
+    wrap_it_up('scrape_exec_orders', t0, new_rows, new_rows)
 
 
 def main():
-    ifttt_payload = {}
-    scrape_exec_orders(ifttt_payload)
-    ifttt_event_url = os.environ['IFTTT_WEBHOOKS_URL'].format('sos_scraper')
-    requests.post(ifttt_event_url, json=ifttt_payload)
+    scrape_exec_orders()
 
 
 if __name__ == "__main__":

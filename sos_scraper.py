@@ -4,49 +4,30 @@ import os
 import time
 from io import BytesIO
 import requests
-from airtable import Airtable
 from bs4 import BeautifulSoup
-from documentcloud import DocumentCloud
-from twython import Twython
-
-airtab = Airtable(os.environ['other_scrapers_db'], "exec orders", os.environ['AIRTABLE_API_KEY'])
-airtab_log = Airtable(os.environ['log_db'], 'log', os.environ['AIRTABLE_API_KEY'])
-
-dc = DocumentCloud(os.environ['DOCUMENT_CLOUD_USERNAME'], os.environ['DOCUMENT_CLOUD_PW'])
-
-tw = Twython(os.environ['TWITTER_APP_KEY'], os.environ['TWITTER_APP_SECRET'],
-             os.environ['TWITTER_OAUTH_TOKEN'], os.environ['TWITTER_OAUTH_TOKEN_SECRET'])
-
-muh_headers = {"user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36"}
-url = "https://www.sos.ms.gov/Education-Publications/Pages/Executive-Orders.aspx"
+from ..jail_scrapers import airtab_sos as airtab, dc, tw, muh_headers, wrap_from_module
 
 
-def wrap_it_up(function, t0, new, total):
-    this_dict = {'module': 'sos_scraper.py'}
-    this_dict['function'] = function
-    this_dict['duration'] = round(time.time() - t0, 2)
-    this_dict['total'] = total
-    this_dict['new'] = new
-    airtab_log.insert(this_dict, typecast=True)
+wrap_it_up = wrap_from_module('sos_scraper.py')
 
 
 def scrape_exec_orders():
     """This function does blah blah."""
+    url, t0, new, total = 'https://www.sos.ms.gov/Education-Publications/Pages/Executive-Orders.aspx', time.time(), 0, 0
     t0 = time.time()
     r = requests.get(url, headers=muh_headers)
     soup = BeautifulSoup(r.text, "html.parser").find('table', class_='table-striped')
     rows = soup.find_all("tr")
-    new_rows, total_rows = 0, 0
     for row in rows:
         cells = row.find_all("td")
         if len(cells) == 3:
-            total_rows += 1
+            total += 1
             this_dict = {}
             if cells[0].string:
                 this_dict["order_number"] = cells[0].string.strip()
                 m = airtab.match("order_number", this_dict["order_number"])
                 if not m:
-                    new_rows += 1
+                    new += 1
                     # There's a new Exec Order!
                     this_dict["order_url"] = f"https://www.sos.ms.gov{cells[1].a.get('href')}"
                     this_dict["url_description"] = cells[1].get_text(
@@ -83,7 +64,7 @@ def scrape_exec_orders():
                         f"{this_dict['order_url']}"
                     )
                     tw.update_status(status=status, media_ids=media_ids)
-    wrap_it_up('scrape_exec_orders', t0, new_rows, total_rows)
+    wrap_it_up(function='scrape_exec_orders', t0=t0, new=new, total=total)
 
 
 def main():

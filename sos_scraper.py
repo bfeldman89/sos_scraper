@@ -5,7 +5,7 @@ import time
 from io import BytesIO
 import requests
 from bs4 import BeautifulSoup
-from ..jail_scrapers import airtab_sos as airtab, dc, tw, muh_headers, wrap_from_module
+from common import airtab_sos as airtab, dc, tw, muh_headers, wrap_from_module
 
 
 wrap_it_up = wrap_from_module('sos_scraper.py')
@@ -64,7 +64,7 @@ def scrape_exec_orders():
                         f"{this_dict['order_url']}"
                     )
                     tw.update_status(status=status, media_ids=media_ids)
-    wrap_it_up(function='scrape_exec_orders', t0=t0, new=new, total=total)
+    wrap_it_up(t0=t0, new=new, total=total, function='scrape_exec_orders')
 
 
 def main():

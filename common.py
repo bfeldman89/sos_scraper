@@ -32,11 +32,15 @@ tw = Twython(os.environ['TWITTER_APP_KEY'], os.environ['TWITTER_APP_SECRET'],
              os.environ['TWITTER_OAUTH_TOKEN'], os.environ['TWITTER_OAUTH_TOKEN_SECRET'])
 
 
+my_funcs = {'scrape_exec_orders': 'recBvGm8iIBnMQyRy'}
+
+
 def wrap_from_module(module):
     def wrap_it_up(t0, new=None, total=None, function=None):
         this_dict = {
             'module': module,
             'function': function,
+            '_function': my_funcs[function],
             'duration': round(time.time() - t0, 2),
             'total': total,
             'new': new

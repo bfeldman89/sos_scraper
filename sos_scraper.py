@@ -60,7 +60,7 @@ def scrape_exec_orders():
                         media_ids.append(response["media_id"])
                     status = (
                         "The Sec. of State has added an executive order to its website.\n"
-                        f"On {this_dict['date_of_order']}, Gov. Bryant issued {this_dict['dc_title']}.\n"
+                        f"On {this_dict['date_of_order']}, Gov. Reeves issued {this_dict['dc_title']}.\n"
                         f"{this_dict['order_url']}"
                     )
                     tw.update_status(status=status, media_ids=media_ids)

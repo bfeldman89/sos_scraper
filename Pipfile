@@ -7,6 +7,13 @@ verify_ssl = true
 pylint = "*"
 
 [packages]
+airtable-python-wrapper = "*"
+beautifulsoup4 = "*"
+cloudinary = "*"
+python-documentcloud = "*"
+requests = "*"
+tweepy = "*"
+twython = "*"
 
 [requires]
 python_version = "3.8"

@@ -26,7 +26,7 @@ def scrape_exec_orders():
         if not m:
             new += 1
             # There's a new Exec Order!
-            this_dict['order_url'] = f"https://www.sos.ms.gov/content/executiveorders/ExecutiveOrders/{cells[4]}.pdf"
+            this_dict['order_url'] = f"https://www.sos.ms.gov/content/executiveorders/ExecutiveOrders/{cells[4]}"
             this_dict['url_description'] = cells[5]
             this_dict['date_of_order'] = cells[3]
             # upload to documnentcloud
@@ -34,16 +34,21 @@ def scrape_exec_orders():
             obj = dc.documents.upload(
                 this_dict['order_url'], title=fn, source='MS SOS', access='public', data={'type': 'EO'})
             obj = dc.documents.get(obj.id)
-            while obj.access != 'public':
+            loops = 1
+            while obj.access != 'public' and loops < 4:
                 time.sleep(7)
                 obj = dc.documents.get(obj.id)
+                loops += 1
             this_dict['dc_id'] = obj.id
             this_dict['dc_title'] = obj.title
-            this_dict['dc_access'] = obj.access
-            this_dict['dc_pages'] = obj.pages
-            full_text = obj.full_text.decode('utf-8')
-            this_dict['dc_full_text'] = os.linesep.join(
-                [s for s in full_text.splitlines() if s])
+            try:
+                this_dict['dc_access'] = obj.access
+                this_dict['dc_pages'] = obj.pages
+                full_text = obj.full_text.decode('utf-8')
+                this_dict['dc_full_text'] = os.linesep.join(
+                    [s for s in full_text.splitlines() if s])
+            except NotImplementedError as err:
+                print('problem uploading to documentcloud: ', err)
             airtab.insert(this_dict, typecast=True)
             media_ids = []
             image_list = obj.normal_image_url_list[:4]

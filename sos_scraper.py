@@ -39,12 +39,12 @@ def scrape_exec_orders():
                 time.sleep(6)
                 obj = dc.documents.get(obj.id)
                 loops += 1
-            this_dict['dc_id'] = obj.id
+            this_dict['dc_id'] = str(obj.id)
             this_dict['dc_title'] = obj.title
             try:
                 this_dict['dc_access'] = obj.access
                 this_dict['dc_pages'] = obj.pages
-                full_text = obj.full_text.decode('utf-8')
+                full_text = obj.full_text
                 this_dict['dc_full_text'] = os.linesep.join(
                     [s for s in full_text.splitlines() if s])
             except NotImplementedError as err:
@@ -86,7 +86,7 @@ def scrape_exec_orders_v2():
         try:
             this_dict['dc_access'] = obj.access
             this_dict['dc_pages'] = obj.pages
-            full_text = obj.full_text.decode('utf-8')
+            full_text = obj.full_text
             this_dict['dc_full_text'] = os.linesep.join(
                 [s for s in full_text.splitlines() if s])
         except NotImplementedError as err:

@@ -4,6 +4,8 @@ import os
 import time
 from io import BytesIO
 import requests
+from documentcloud import exceptions
+
 from common import airtab_sos as airtab, dc, tw, muh_headers, wrap_from_module
 
 
@@ -30,25 +32,24 @@ def scrape_exec_orders():
             this_dict['url_description'] = cells[5]
             this_dict['date_of_order'] = cells[3]
             # upload to documnentcloud
-            fn = 'Executive Order No. ' + this_dict['order_number']
-            obj = dc.documents.upload(
-                this_dict['order_url'], title=fn, source='MS SOS', access='public', data={'type': 'EO'})
-            obj = dc.documents.get(obj.id)
-            loops = 1
-            while obj.access != 'public' and loops < 30:
-                time.sleep(6)
-                obj = dc.documents.get(obj.id)
-                loops += 1
+            obj = dc.documents.upload(this_dict['order_url'])
+            while obj.access not in {"public", "success"}:
+                print(obj.access)
+                try:
+                    obj.access = "public"
+                    obj.put()
+                except exceptions.APIError as err:
+                    print(err)
+                    time.sleep(5)
+                    obj = dc.documents.get(obj.id)
+            obj.title = 'Executive Order No. ' + this_dict['order_number']
+            obj.source = 'MS SOS'
+            obj.data = {'type': 'EO'}
+            obj.put()
             this_dict['dc_id'] = str(obj.id)
             this_dict['dc_title'] = obj.title
-            try:
-                this_dict['dc_access'] = obj.access
-                this_dict['dc_pages'] = obj.pages
-                full_text = obj.full_text
-                this_dict['dc_full_text'] = os.linesep.join(
-                    [s for s in full_text.splitlines() if s])
-            except NotImplementedError as err:
-                print('problem uploading to documentcloud: ', err)
+            this_dict['dc_access'] = obj.access
+            this_dict['dc_pages'] = obj.pages
             airtab.insert(this_dict, typecast=True)
             status = (
                 'The Sec. of State has added an executive order to its website.\n'

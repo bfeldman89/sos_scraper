@@ -3,7 +3,6 @@
 import time
 from io import BytesIO
 import requests
-from documentcloud import exceptions
 from common import airtab_sos as airtab, dc, tw, muh_headers, wrap_from_module
 
 wrap_it_up = wrap_from_module('sos_scraper.py')
@@ -46,20 +45,11 @@ def scrape_exec_orders():
             while obj.status != "success":
                 time.sleep(5)
                 obj = dc.documents.get(obj.id)
-            # while obj.access != "public":
-            #     time.sleep(5)
-            #     try:
-            #         obj.access = "public"
-            #         obj.data = {'type': 'EO'}
-            #         obj.put()
-            #     except exceptions.APIError as err:
-            #         print(err)
-            #     obj = dc.documents.get(obj.id)
             obj.access = "public"
             obj.data = {'type': 'EO'}
-            obj.put()
             obj.title = 'Executive Order No. ' + this_dict['order_number']
             obj.source = 'MS SOS'
+            obj.put()
 
             this_dict['dc_id'] = str(obj.id)
             this_dict['dc_title'] = obj.title

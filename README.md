@@ -11,3 +11,5 @@
 ## summary
 
 Every hour, `sos_scraper.py` scrapes the MS Sec. of State's webpage for new executive orders. When an executive order is detected for the first time, the data is entered into the Airtable base, the pdf is uploaded to documentcloud, and [@botfeldman89](https://twitter.com/botfeldman89) tweets out a link to the pdf.
+
+![Screen Shot 2020-07-18 at 10 05 49 PM](https://user-images.githubusercontent.com/26087892/87866262-2215c580-c945-11ea-9552-3e4d02f0743c.png)

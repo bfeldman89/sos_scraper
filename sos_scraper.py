@@ -55,14 +55,19 @@ def scrape_exec_orders():
             this_dict['dc_title'] = obj.title
             this_dict['dc_access'] = obj.access
             this_dict['dc_pages'] = obj.pages
-            airtab.insert(this_dict, typecast=True)
+            this_dict['dc_url'] = obj.canonical_url
             status = (
                 'The Sec. of State has added an executive order to its website.\n'
                 f"On {this_dict['date_of_order']}, Gov. Reeves issued {this_dict['dc_title']}.\n"
-                f"{this_dict['order_url']}"
+                f"{this_dict['dc_url']}"
             )
-            media_ids = get_images(obj.id)
+            try:
+                media_ids = get_images(obj.id)
+            except requests.exceptions.HTTPError:
+                media_ids = None
+                print('error accessing and uploading the images of first 1-4 poages')
             tw.update_status(status=status, media_ids=media_ids)
+            airtab.insert(this_dict, typecast=True)
     wrap_it_up(t0=t0, new=new, total=total, function='scrape_exec_orders')
 
 

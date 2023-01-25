@@ -50,7 +50,6 @@ def scrape_exec_orders():
             obj.title = 'Executive Order No. ' + this_dict['order_number']
             obj.source = 'MS SOS'
             obj.put()
-
             this_dict['dc_id'] = str(obj.id)
             this_dict['dc_title'] = obj.title
             this_dict['dc_access'] = obj.access

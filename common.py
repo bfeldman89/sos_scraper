@@ -5,7 +5,7 @@ import os
 import time
 from airtable import Airtable
 from documentcloud import DocumentCloud
-from twython import Twython
+import tweepy
 
 
 airtab_log = Airtable(os.environ['log_db'],
@@ -40,8 +40,27 @@ muh_headers = {"Content-Type": "application/json; charset=utf-8",
                "Cookie": "f5_cspm=1234; _ga=GA1.2.1800542741.1584480254; _gat=1; _gid=GA1.2.639081259.1585870866; f5avraaaaaaaaaaaaaaaa_session_=NOKMMGKKIAGOJCILJLKFGAFONADMLGLLFPLFFNCONMMEHKMOHAHFCHKAAHHIDFALMPKDDNOLFLPJKNEFPKPAFOOCCHHPBMOKANAGKCEHOAMFKIGEMNFOFPPGGHOKMPEP; BIGipServerpl_sos_web_server_ext_https=rd1o00000000000000000000ffff0a0d3b0bo443; BIGipServerpl_msi_prod_https=rd1o00000000000000000000ffff0a0df71fo443",
                "X-Requested-With": "XMLHttpRequest"}
 
-tw = Twython(os.environ['TWITTER_APP_KEY'], os.environ['TWITTER_APP_SECRET'],
-             os.environ['TWITTER_OAUTH_TOKEN'], os.environ['TWITTER_OAUTH_TOKEN_SECRET'])
+def get_twitter_conn_v1(api_key, api_secret, access_token, access_token_secret) -> tweepy.API:
+    """Get twitter conn 1.1"""
+    auth = tweepy.OAuth1UserHandler(api_key, api_secret)
+    auth.set_access_token(
+        access_token,
+        access_token_secret,
+    )
+    return tweepy.API(auth)
+
+def get_twitter_conn_v2(api_key, api_secret, access_token, access_token_secret) -> tweepy.Client:
+    """Get twitter conn 2.0"""
+    client = tweepy.Client(
+        consumer_key=api_key,
+        consumer_secret=api_secret,
+        access_token=access_token,
+        access_token_secret=access_token_secret,
+    )
+    return client
+
+client_v1 = get_twitter_conn_v1(os.environ['TWITTER_APP_KEY'], os.environ['TWITTER_APP_SECRET'], os.environ['TWITTER_OAUTH_TOKEN'], os.environ['TWITTER_OAUTH_TOKEN_SECRET'])
+client_v2 = get_twitter_conn_v2(os.environ['TWITTER_APP_KEY'], os.environ['TWITTER_APP_SECRET'], os.environ['TWITTER_OAUTH_TOKEN'], os.environ['TWITTER_OAUTH_TOKEN_SECRET'])
 
 
 my_funcs = {'scrape_exec_orders': 'recBvGm8iIBnMQyRy'}

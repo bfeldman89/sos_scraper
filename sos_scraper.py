@@ -3,7 +3,7 @@
 import time
 from io import BytesIO
 import requests
-from common import airtab_sos as airtab, dc, tw, muh_headers, wrap_from_module
+from common import airtab_sos as airtab, client_v1, client_v2, dc, muh_headers, wrap_from_module
 
 wrap_it_up = wrap_from_module('sos_scraper.py')
 
@@ -16,8 +16,9 @@ def get_images(dc_id):
         res = requests.get(image)
         res.raise_for_status()
         uploadable = BytesIO(res.content)
-        response = tw.upload_media(media=uploadable)
-        media_ids.append(response['media_id'])
+        media = client_v1.media_upload(file=uploadable)
+        media_id = media.media_id
+        media_ids.append(media_id)
     return media_ids
 
 
@@ -65,7 +66,7 @@ def scrape_exec_orders():
             except requests.exceptions.HTTPError:
                 media_ids = None
                 print('error accessing and uploading the images of first 1-4 poages')
-            tw.update_status(status=status, media_ids=media_ids)
+            client_v2.create_tweet(text=status, media_ids=media_ids)
             airtab.insert(this_dict, typecast=True)
     wrap_it_up(t0=t0, new=new, total=total, function='scrape_exec_orders')
 

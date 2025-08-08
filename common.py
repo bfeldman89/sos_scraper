@@ -3,22 +3,20 @@
 
 import os
 import time
-from airtable import Airtable
+from pyairtable import Api
 from documentcloud import DocumentCloud
 import tweepy
 
+api = Api(os.environ['AIRTABLE_PAT'])
 
-airtab_log = Airtable(os.environ['log_db'],
-                      table_name='log',
-                      api_key=os.environ['AIRTABLE_API_KEY'])
+airtab_log = api.table(os.environ['log_db'],
+                      'log')
 
-airtab_sos = Airtable(os.environ['other_scrapers_db'],
-                      table_name='exec_orders',
-                      api_key=os.environ['AIRTABLE_API_KEY'])
+airtab_sos = api.table(os.environ['other_scrapers_db'],
+                      'exec_orders')
 
-airtab_tweets = Airtable(os.environ['botfeldman89_db'],
-                         table_name='scheduled_tweets',
-                         api_key=os.environ['AIRTABLE_API_KEY'])
+airtab_tweets = api.table(os.environ['botfeldman89_db'],
+                         'scheduled_tweets')
 
 
 
